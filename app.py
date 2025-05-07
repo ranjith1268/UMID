@@ -18,12 +18,13 @@ def load_credentials():
     except FileNotFoundError:
         # Create default credentials file if it doesn't exist
         default_credentials = pd.DataFrame({
-            "ID": ["admin1", "doctor1", "patient1"],
-            "category": ["admin", "doctor", "user"],
+            "ID": ["admin1", "doctor1", "patient1", "pharmassist1"],
+            "category": ["admin", "doctor", "user", "pharmassist"],
             "password": [
                 hashlib.sha256("admin123".encode()).hexdigest(),
                 hashlib.sha256("doctor123".encode()).hexdigest(),
-                hashlib.sha256("patient123".encode()).hexdigest()
+                hashlib.sha256("patient123".encode()).hexdigest(),
+                hashlib.sha256("pharma123".encode()).hexdigest()
             ]
         })
         default_credentials.to_csv("credentials.csv", index=False)
@@ -139,7 +140,10 @@ def main():
         elif st.session_state.user_category == "admin":
             import admin
             admin.show_admin_page()
-        
+        elif st.session_state.user_category == "pharmassist":
+            import pharmassist
+            pharmassist.show_pharmassist_page(st.session_state.user_id)
+    
         if st.sidebar.button("Logout"):
             log_activity(st.session_state.user_id, "Logged out")
             st.session_state.logged_in = False

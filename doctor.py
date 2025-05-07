@@ -96,6 +96,73 @@ def show_doctor_page(doctor_id):
                             patient_data.to_csv("patient_data.csv", index=False)
                             st.success("Notes updated successfully!")
                             log_activity(doctor_id, f"Updated notes for patient {patient_id}")
+                        
+                        # Create prescription data file if it doesn't exist
+                        if not os.path.exists("prescriptions.csv"):
+                            prescriptions = pd.DataFrame(columns=[
+                                "PrescriptionID", "PatientID", "DoctorID", "Date", 
+                                "Medications", "Dosage", "Instructions", "Status"
+                            ])
+                            prescriptions.loc[0] = [
+                                "RX00001", "patient1", "doctor1", "2024-12-15",
+                                "Lisinopril, Aspirin", "10mg daily, 81mg daily",
+                                "Take with food, Take in the morning", "Pending"
+                            ]
+                            prescriptions.to_csv("prescriptions.csv", index=False)
+
+                        # Load prescription data
+                        prescriptions = pd.read_csv("prescriptions.csv")
+
+                        # Add prescription section for the currently viewed patient
+                        st.subheader("Prescriptions")
+                        
+                        # Display existing prescriptions for this patient
+                        patient_prescriptions = prescriptions[prescriptions["PatientID"] == patient_id]
+                        
+                        if not patient_prescriptions.empty:
+                            st.write("Existing Prescriptions:")
+                            for i, rx in patient_prescriptions.iterrows():
+                                with st.expander(f"Prescription {rx['PrescriptionID']} - {rx['Date']} - {rx['Status']}"):
+                                    st.write(f"**Medications:** {rx['Medications']}")
+                                    st.write(f"**Dosage:** {rx['Dosage']}")
+                                    st.write(f"**Instructions:** {rx['Instructions']}")
+                        
+                        # Add new prescription
+                        st.write("Create New Prescription:")
+                        with st.form(f"add_prescription_form_{patient_id}"):
+                            # Generate prescription ID
+                            next_rx_id = f"RX{len(prescriptions) + 1:05d}"
+                            st.write(f"Prescription ID: {next_rx_id}")
+                            
+                            # Prescription details
+                            medications = st.text_area("Medications (comma separated)")
+                            dosage = st.text_area("Dosage (comma separated)")
+                            instructions = st.text_area("Instructions")
+                            date = st.date_input("Prescription Date", value=datetime.datetime.now().date())
+                            
+                            submit_prescription = st.form_submit_button("Create Prescription")
+                            
+                            if submit_prescription:
+                                if not medications or not dosage:
+                                    st.error("Medications and dosage are required.")
+                                else:
+                                    # Add new prescription
+                                    new_prescription = pd.DataFrame({
+                                        "PrescriptionID": [next_rx_id],
+                                        "PatientID": [patient_id],
+                                        "DoctorID": [doctor_id],
+                                        "Date": [date.strftime("%Y-%m-%d")],
+                                        "Medications": [medications],
+                                        "Dosage": [dosage],
+                                        "Instructions": [instructions],
+                                        "Status": ["Pending"]
+                                    })
+                                    
+                                    prescriptions = pd.concat([prescriptions, new_prescription], ignore_index=True)
+                                    prescriptions.to_csv("prescriptions.csv", index=False)
+                                    
+                                    st.success(f"Prescription {next_rx_id} created successfully.")
+                                    log_activity(doctor_id, f"Created prescription {next_rx_id} for patient {patient_id}")
                     
                     else:
                         st.error(f"No records found for Patient ID: {patient_id}")
@@ -103,6 +170,42 @@ def show_doctor_page(doctor_id):
                 
                 else:
                     st.warning("Please enter a Patient ID")
+            
+            # Also add a section to view and manage all prescriptions written by this doctor
+            st.header("Your Prescriptions")
+            
+            # Load prescriptions data if it exists
+            if os.path.exists("prescriptions.csv"):
+                prescriptions = pd.read_csv("prescriptions.csv")
+                doctor_prescriptions = prescriptions[prescriptions["DoctorID"] == doctor_id]
+
+                if not doctor_prescriptions.empty:
+                    # Sort by date (newest first)
+                    doctor_prescriptions = doctor_prescriptions.sort_values(by="Date", ascending=False)
+                    
+                    for i, rx in doctor_prescriptions.iterrows():
+                        # Get patient name
+                        patient_name = "Unknown"
+                        if rx["PatientID"] in patient_data["ID"].values:
+                            patient_name = patient_data[patient_data["ID"] == rx["PatientID"]].iloc[0]["Name"]
+                        
+                        with st.expander(f"Prescription {rx['PrescriptionID']} - {patient_name} - {rx['Date']} - {rx['Status']}"):
+                            st.write(f"**Patient ID:** {rx['PatientID']}")
+                            st.write(f"**Medications:** {rx['Medications']}")
+                            st.write(f"**Dosage:** {rx['Dosage']}")
+                            st.write(f"**Instructions:** {rx['Instructions']}")
+                            
+                            # Allow cancellation if status is pending
+                            if rx["Status"] == "Pending":
+                                if st.button(f"Cancel Prescription {rx['PrescriptionID']}", key=f"cancel_{rx['PrescriptionID']}"):
+                                    prescriptions.loc[prescriptions["PrescriptionID"] == rx["PrescriptionID"], "Status"] = "Cancelled"
+                                    prescriptions.to_csv("prescriptions.csv", index=False)
+                                    st.success(f"Prescription {rx['PrescriptionID']} cancelled.")
+                                    log_activity(doctor_id, f"Cancelled prescription {rx['PrescriptionID']}")
+                else:
+                    st.info("You haven't created any prescriptions yet.")
+            else:
+                st.info("Prescription system is being initialized. Create your first prescription to get started.")
             
             # Advanced medical chatbot for doctors
             st.header("Medical Knowledge Assistant")

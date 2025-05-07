@@ -4,8 +4,6 @@ import datetime
 import os
 from langchain_openai import AzureChatOpenAI
 
-
-
 base_llm=AzureChatOpenAI(
         azure_endpoint=st.secrets["AZURE_ENDPOINT"],
         api_key=st.secrets["AZURE_API_KEY"],

@@ -102,10 +102,11 @@ def show_admin_page():
         doctor_data = pd.read_csv("doctor_data.csv")
         
         # Create tabs for different sections
-        tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
             "Dashboard", "Manage Users", "Manage Patients", 
-            "Manage Doctors", "System Analysis"
-        ])
+            "Manage Doctors", "Manage Pharmacy", "System Analysis"
+            ])
+
         
         # Tab 1: Dashboard
         with tab1:
@@ -144,7 +145,7 @@ def show_admin_page():
             st.subheader("Add New User")
             with st.form("add_user_form"):
                 new_user_id = st.text_input("User ID")
-                new_user_category = st.selectbox("User Category", ["user", "doctor", "admin"])
+                new_user_category = st.selectbox("User Category", ["user", "doctor", "admin", "pharmassist"])
                 new_user_password = st.text_input("Password", type="password")
                 confirm_password = st.text_input("Confirm Password", type="password")
                 
@@ -179,6 +180,8 @@ def show_admin_page():
                             st.info("Please go to the 'Manage Patients' tab to add patient details.")
                         elif new_user_category == "doctor":
                             st.info("Please go to the 'Manage Doctors' tab to add doctor details.")
+                        elif new_user_category == "pharmassist":
+                            st.info("Please go to the 'Manage pharmassist' tab to add pharmassist details.")
             
             # Delete user
             st.subheader("Delete User")
@@ -399,9 +402,192 @@ def show_admin_page():
                                 
                                 st.success(f"Doctor record for '{name}' updated successfully.")
                                 log_activity(admin_id, f"Updated doctor record for user: {selected_id}")
-        
-        # Tab 5: System Analysis
+
+
         with tab5:
+            st.header("Manage Pharmacy")
+    
+            # Load pharmacy data
+            try:
+                # Create pharmacy assistant data file if it doesn't exist
+                if not os.path.exists("pharmassist_data.csv"):
+                    pharmassist_data = pd.DataFrame(columns=[
+                        "ID", "Name", "Qualification", "Experience", "Email", "Phone"
+                    ])
+                    pharmassist_data.loc[0] = [
+                        "pharmassist1", "Robert Johnson", "Pharmacy Technician", "5 years", 
+                        "robert@umid.com", "+1-555-987-6543"
+                    ]
+                    pharmassist_data.to_csv("pharmassist_data.csv", index=False)
+                
+                pharmassist_data = pd.read_csv("pharmassist_data.csv")
+                
+                # Create prescription data file if it doesn't exist
+                if not os.path.exists("prescriptions.csv"):
+                    prescriptions = pd.DataFrame(columns=[
+                        "PrescriptionID", "PatientID", "DoctorID", "Date", 
+                        "Medications", "Dosage", "Instructions", "Status"
+                    ])
+                    prescriptions.loc[0] = [
+                        "RX00001", "patient1", "doctor1", "2024-12-15",
+                        "Lisinopril, Aspirin", "10mg daily, 81mg daily",
+                        "Take with food, Take in the morning", "Pending"
+                    ]
+                    prescriptions.to_csv("prescriptions.csv", index=False)
+                
+                prescriptions = pd.read_csv("prescriptions.csv")
+                
+                # Create tabs within pharmacy management
+                pharm_tab1, pharm_tab2 = st.tabs(["Manage Pharmacy Staff", "Manage Prescriptions"])
+                
+                # Manage Pharmacy Staff tab
+                with pharm_tab1:
+                    st.subheader("Current Pharmacy Assistants")
+                    st.dataframe(pharmassist_data)
+                    
+                    # Add/update pharmacy assistants
+                    st.subheader("Add/Update Pharmacy Assistant")
+                    pharmassist_ids = credentials_df[credentials_df["category"] == "pharmassist"]["ID"].tolist()
+                    
+                    # Only show users that don't already have pharmacy assistant records
+                    new_pharmassist_ids = [pid for pid in pharmassist_ids if pid not in pharmassist_data["ID"].values]
+                    existing_pharmassist_ids = [pid for pid in pharmassist_ids if pid in pharmassist_data["ID"].values]
+                    
+                    # Choose between adding new pharmacy assistant or updating existing one
+                    action = st.radio("Action", ["Add New Pharmacy Assistant", "Update Existing Pharmacy Assistant"], key="pharmassist_action")
+                    
+                    if action == "Add New Pharmacy Assistant":
+                        if not new_pharmassist_ids:
+                            st.warning("No user accounts available to add as pharmacy assistants. Create pharmacy assistant accounts first.")
+                        else:
+                            selected_id = st.selectbox("Select User ID", new_pharmassist_ids)
+                            
+                            with st.form("add_pharmassist_form"):
+                                name = st.text_input("Full Name")
+                                qualification = st.text_input("Qualification")
+                                experience = st.text_input("Experience (e.g., '5 years')")
+                                email = st.text_input("Email")
+                                phone = st.text_input("Phone Number")
+                                
+                                submit_pharmassist = st.form_submit_button("Add Pharmacy Assistant")
+                                
+                                if submit_pharmassist:
+                                    if not name or not qualification:
+                                        st.error("Name and qualification are required.")
+                                    else:
+                                        # Add new pharmacy assistant record
+                                        new_pharmassist = pd.DataFrame({
+                                            "ID": [selected_id],
+                                            "Name": [name],
+                                            "Qualification": [qualification],
+                                            "Experience": [experience],
+                                            "Email": [email],
+                                            "Phone": [phone]
+                                        })
+                                        
+                                        pharmassist_data = pd.concat([pharmassist_data, new_pharmassist], ignore_index=True)
+                                        pharmassist_data.to_csv("pharmassist_data.csv", index=False)
+                                        
+                                        st.success(f"Pharmacy assistant record for '{name}' added successfully.")
+                                        log_activity(admin_id, f"Added pharmacy assistant record for user: {selected_id}")
+                    else:  # Update Existing Pharmacy Assistant
+                        if not existing_pharmassist_ids:
+                            st.warning("No existing pharmacy assistants to update.")
+                        else:
+                            selected_id = st.selectbox("Select Pharmacy Assistant ID", existing_pharmassist_ids)
+                            pharmassist_row = pharmassist_data[pharmassist_data["ID"] == selected_id].iloc[0]
+                            
+                            with st.form("update_pharmassist_form"):
+                                name = st.text_input("Full Name", value=pharmassist_row["Name"])
+                                qualification = st.text_input("Qualification", value=pharmassist_row["Qualification"])
+                                experience = st.text_input("Experience", value=pharmassist_row["Experience"])
+                                email = st.text_input("Email", value=pharmassist_row["Email"])
+                                phone = st.text_input("Phone Number", value=pharmassist_row["Phone"])
+                                
+                                submit_update = st.form_submit_button("Update Pharmacy Assistant")
+                                
+                                if submit_update:
+                                    if not name or not qualification:
+                                        st.error("Name and qualification are required.")
+                                    else:
+                                        # Update pharmacy assistant record
+                                        pharmassist_data.loc[pharmassist_data["ID"] == selected_id, "Name"] = name
+                                        pharmassist_data.loc[pharmassist_data["ID"] == selected_id, "Qualification"] = qualification
+                                        pharmassist_data.loc[pharmassist_data["ID"] == selected_id, "Experience"] = experience
+                                        pharmassist_data.loc[pharmassist_data["ID"] == selected_id, "Email"] = email
+                                        pharmassist_data.loc[pharmassist_data["ID"] == selected_id, "Phone"] = phone
+                                        
+                                        pharmassist_data.to_csv("pharmassist_data.csv", index=False)
+                                        
+                                        st.success(f"Pharmacy assistant record for '{name}' updated successfully.")
+                                        log_activity(admin_id, f"Updated pharmacy assistant record for user: {selected_id}")
+                
+                # Manage Prescriptions tab
+                with pharm_tab2:
+                    st.subheader("All Prescriptions")
+                    st.dataframe(prescriptions)
+                    
+                    # Add new prescription
+                    st.subheader("Add New Prescription")
+                    with st.form("add_prescription_form"):
+                        # Get patient and doctor IDs
+                        patient_options = patient_data["ID"].tolist()
+                        doctor_options = doctor_data["ID"].tolist()
+                        
+                        patient_id = st.selectbox("Select Patient", patient_options)
+                        doctor_id = st.selectbox("Select Doctor", doctor_options)
+                        
+                        # Generate prescription ID
+                        next_rx_id = f"RX{len(prescriptions) + 1:05d}"
+                        st.write(f"Prescription ID: {next_rx_id}")
+                        
+                        # Prescription details
+                        medications = st.text_area("Medications (comma separated)")
+                        dosage = st.text_area("Dosage (comma separated)")
+                        instructions = st.text_area("Instructions")
+                        date = st.date_input("Prescription Date", value=datetime.datetime.now().date())
+                        status = st.selectbox("Status", ["Pending", "Dispensed", "Cancelled"])
+                        
+                        submit_prescription = st.form_submit_button("Add Prescription")
+                        
+                        if submit_prescription:
+                            if not medications or not dosage:
+                                st.error("Medications and dosage are required.")
+                            else:
+                                # Add new prescription
+                                new_prescription = pd.DataFrame({
+                                    "PrescriptionID": [next_rx_id],
+                                    "PatientID": [patient_id],
+                                    "DoctorID": [doctor_id],
+                                    "Date": [date.strftime("%Y-%m-%d")],
+                                    "Medications": [medications],
+                                    "Dosage": [dosage],
+                                    "Instructions": [instructions],
+                                    "Status": [status]
+                                })
+                                
+                                prescriptions = pd.concat([prescriptions, new_prescription], ignore_index=True)
+                                prescriptions.to_csv("prescriptions.csv", index=False)
+                                
+                                st.success(f"Prescription {next_rx_id} added successfully.")
+                                log_activity(admin_id, f"Added new prescription: {next_rx_id}")
+                    
+                    # Update prescription status
+                    st.subheader("Update Prescription Status")
+                    rx_id = st.selectbox("Select Prescription ID", prescriptions["PrescriptionID"].tolist())
+                    new_status = st.selectbox("New Status", ["Pending", "Dispensed", "Cancelled"])
+                    
+                    if st.button("Update Status"):
+                        prescriptions.loc[prescriptions["PrescriptionID"] == rx_id, "Status"] = new_status
+                        prescriptions.to_csv("prescriptions.csv", index=False)
+                        st.success(f"Prescription {rx_id} status updated to {new_status}.")
+                        log_activity(admin_id, f"Updated prescription status: {rx_id} to {new_status}")
+                        
+            except Exception as e:
+                st.error(f"Error managing pharmacy data: {str(e)}")
+
+        # Tab 6: System Analysis
+        with tab6:
             st.header("System Analysis")
             
             # Display system statistics
