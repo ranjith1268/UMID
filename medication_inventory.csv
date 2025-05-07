@@ -1,0 +1,4 @@
+MedicationID,Name,Dosage,Quantity,ExpiryDate
+MED001,Lisinopril,10mg,99,2025-12-31
+MED002,Aspirin,81mg,199,2026-06-30
+MED003,Amoxicillin,500mg,50,2025-06-15

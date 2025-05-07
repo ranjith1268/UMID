@@ -1,0 +1,2 @@
+PrescriptionID,PatientID,DoctorID,Date,Medications,Dosage,Instructions,Status
+RX00001,patient1,doctor1,2024-12-15,"Lisinopril, Aspirin","10mg daily, 81mg daily","Take with food, Take in the morning",Dispensed
