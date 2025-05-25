@@ -6,8 +6,5 @@ Pillow
 langchain
 langchain-openai
 cmake
-build-essential
-libboost-all-dev
-cmake
 dlib
 face_recognition
