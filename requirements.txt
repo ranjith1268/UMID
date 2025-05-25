@@ -5,6 +5,10 @@ pandas
 Pillow
 langchain
 langchain-openai
-cmake
-dlib
-face_recognition
+pyfingerprint
+pyserial
+hashlib
+json
+platform
+datetime
+random
