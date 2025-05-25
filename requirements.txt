@@ -1,4 +1,10 @@
 streamlit
+opencv-python
+numpy
 pandas
+Pillow
 langchain
-langchain_openai
+langchain-openai
+cmake
+dlib
+face_recognition
