@@ -1130,7 +1130,7 @@ def main():
     st.markdown("""
     <div style="background: linear-gradient(90deg, #1e3a8a 0%, #3730a3 100%); padding: 1rem; border-radius: 10px; margin-bottom: 2rem;">
         <h1 style="color: white; text-align: center; margin: 0;">
-            🏥 UMID - Unified Medical Information Database
+            🏥 UMID - UNIVERSAL MEDICAL IDENTITY
         </h1>
         <p style="color: #e0e7ff; text-align: center; margin: 0;">
             Secure Medical Records Management with Biometric Authentication
@@ -1144,18 +1144,6 @@ def main():
         credentials_df = load_credentials()
         
         st.markdown("## 🔐 System Access")
-        
-        # Display sample credentials
-        with st.expander("📋 Sample Login Credentials"):
-            st.markdown("""
-            **Admin:** admin1 / admin123
-            
-            **Doctor:** doctor1 / doctor123
-            
-            **Patient:** patient1 / patient123
-            
-            **Pharmacy:** pharmassist1 / pharma123
-            """)
         
         # Login tabs
         tab1, tab2, tab3 = st.tabs(["🔑 Credential Login", "👆 Fingerprint Login", "📝 Register Fingerprint"])
