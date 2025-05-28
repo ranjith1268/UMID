@@ -85,9 +85,9 @@ def create_required_files():
                 "LastCheckup", "DoctorNotes"
             ])
             sample_data = [
-                ["patient1", "John Doe", 35, "Male", "O+", "Hypertension", "Lisinopril", "None", "2024-12-15", "Regular checkup; BP slightly elevated"],
-                ["patient2", "Jane Smith", 42, "Female", "A+", "Diabetes Type 2", "Metformin", "Penicillin", "2024-12-10", "Blood sugar levels stable"],
-                ["patient3", "Robert Johnson", 28, "Male", "B-", "Asthma", "Albuterol", "None", "2024-12-12", "Mild asthma, well controlled"]
+                ["patient1", "Sai", 35, "Male", "O+", "Hypertension", "Lisinopril", "None", "2024-12-15", "Regular checkup; BP slightly elevated"],
+                ["patient2", "Imran", 42, "male", "A+", "Diabetes Type 2", "Metformin", "Penicillin", "2024-12-10", "Blood sugar levels stable"],
+                ["patient3", "Aravindh", 28, "Male", "B-", "Asthma", "Albuterol", "None", "2024-12-12", "Mild asthma, well controlled"]
             ]
             for i, data in enumerate(sample_data):
                 patient_data.loc[i] = data
@@ -99,9 +99,9 @@ def create_required_files():
                 "ID", "Name", "Specialization", "Experience", "Email", "Phone"
             ])
             sample_doctors = [
-                ["doctor1", "Dr. Jane Smith", "Cardiologist", "15 years", "dr.jane@umid.com", "+1-555-123-4567"],
-                ["doctor2", "Dr. Michael Brown", "Endocrinologist", "12 years", "dr.michael@umid.com", "+1-555-123-4568"],
-                ["doctor3", "Dr. Sarah Wilson", "Pulmonologist", "8 years", "dr.sarah@umid.com", "+1-555-123-4569"]
+                ["doctor1", "Dr. Bharath", "Cardiologist", "15 years", "dr.jane@umid.com", "+1-555-123-4567"],
+                ["doctor2", "Dr. Hariharan", "Endocrinologist", "12 years", "dr.michael@umid.com", "+1-555-123-4568"],
+                ["doctor3", "Dr. Imran", "Pulmonologist", "8 years", "dr.sarah@umid.com", "+1-555-123-4569"]
             ]
             for i, data in enumerate(sample_doctors):
                 doctor_data.loc[i] = data
