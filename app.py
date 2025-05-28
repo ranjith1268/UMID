@@ -1146,7 +1146,7 @@ def main():
     st.markdown("""
     <div style="background: linear-gradient(90deg, #1e3a8a 0%, #3730a3 100%); padding: 1rem; border-radius: 10px; margin-bottom: 2rem;">
         <h1 style="color: white; text-align: center; margin: 0;">
-            🏥 UMID - Unified Medical Information Database
+            🏥 UMID - UNIVERSAL MEDICAL IDENTITY
         </h1>
         <p style="color: #e0e7ff; text-align: center; margin: 0;">
             Secure Medical Records Management with Biometric Authentication
